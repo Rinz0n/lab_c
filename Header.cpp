@@ -2,6 +2,7 @@
 
 template<typename Container>
 void printContainer(const Container& cont) {
+    using namespace std;
     if (cont.empty()) {
         cout << "контейнер пуст" << endl;
         return;
@@ -13,7 +14,8 @@ void printContainer(const Container& cont) {
 }
 
 template<typename Container>
-void fillFromKeyboard(Container& cont, const string& name) {
+void fillFromKeyboard(Container& cont, const std::string& name) {
+    using namespace std;
     cont.clear();
     int n;
     cout << "Введите количество элементов в " << name << ": ";
@@ -35,7 +37,8 @@ void fillFromKeyboard(Container& cont, const string& name) {
 }
 
 template<typename Container>
-void fillFromFile(Container& cont, const string& name) {
+void fillFromFile(Container& cont, const std::string& name) {
+    using namespace std;
     cont.clear();
     string filename;
     cout << "Введите имя файла для " << name << ": ";
@@ -60,7 +63,8 @@ void fillFromFile(Container& cont, const string& name) {
 }
 
 template<typename Container>
-void fillRandom(Container& cont, const string& name) {
+void fillRandom(Container& cont, const std::string& name) {
+    using namespace std;
     cont.clear();
     srand(static_cast<unsigned int>(time(nullptr)));
     int n;
@@ -77,7 +81,8 @@ void fillRandom(Container& cont, const string& name) {
 }
 
 template<typename Container>
-void fillFromKeyboardString(Container& cont, const string& name) {
+void fillFromKeyboardString(Container& cont, const std::string& name) {
+    using namespace std;
     cont.clear();
     int n;
     cout << "Введите количество элементов в " << name << ": ";
@@ -86,7 +91,7 @@ void fillFromKeyboardString(Container& cont, const string& name) {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Ошибка! Введите положительное целое число: ";
     }
-    cout << "Введите " << n << " слов: ";
+    cout << "Введите " << n << " слов (заглавными буквами): ";
     for (int i = 0; i < n; ++i) {
         string value;
         while (!(cin >> value)) {
@@ -99,7 +104,8 @@ void fillFromKeyboardString(Container& cont, const string& name) {
 }
 
 template<typename Container>
-void fillFromFileString(Container& cont, const string& name) {
+void fillFromFileString(Container& cont, const std::string& name) {
+    using namespace std;
     cont.clear();
     string filename;
     cout << "Введите имя файла для " << name << ": ";
@@ -124,7 +130,8 @@ void fillFromFileString(Container& cont, const string& name) {
 }
 
 template<typename Container>
-void fillRandomString(Container& cont, const string& name) {
+void fillRandomString(Container& cont, const std::string& name) {
+    using namespace std;
     cont.clear();
     srand(static_cast<unsigned int>(time(nullptr)));
     int n;
@@ -142,7 +149,8 @@ void fillRandomString(Container& cont, const string& name) {
 }
 
 template<typename Container>
-void fillContainer(Container& cont, const string& containerName) {
+void fillContainer(Container& cont, const std::string& containerName) {
+    using namespace std;
     cout << "\nВыберите способ заполнения " << containerName << ":" << endl;
     cout << "1 - С клавиатуры" << endl;
     cout << "2 - Из файла" << endl;
@@ -154,7 +162,6 @@ void fillContainer(Container& cont, const string& containerName) {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Ошибка! Введите 1, 2 или 3: ";
     }
-    
     switch (choice) {
     case 1:
         fillFromKeyboard(cont, containerName);
@@ -169,7 +176,8 @@ void fillContainer(Container& cont, const string& containerName) {
 }
 
 template<typename Container>
-void fillContainerString(Container& cont, const string& containerName) {
+void fillContainerString(Container& cont, const std::string& containerName) {
+    using namespace std;
     cout << "\nВыберите способ заполнения " << containerName << ":" << endl;
     cout << "1 - С клавиатуры" << endl;
     cout << "2 - Из файла" << endl;
@@ -181,7 +189,6 @@ void fillContainerString(Container& cont, const string& containerName) {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Ошибка! Введите 1, 2 или 3: ";
     }
-    
     switch (choice) {
     case 1:
         fillFromKeyboardString(cont, containerName);
@@ -195,53 +202,43 @@ void fillContainerString(Container& cont, const string& containerName) {
     }
 }
 
-void task1(vector<int>& V) {
-    auto it = find(V.begin(), V.end(), 0);
-    if (it != V.end()) {
-        auto it2 = find(++it, V.end(), 0);
-        if (it2 != V.end()) {
-            V.erase(it2);
+void task3(std::vector<int>& V0, const std::vector<std::vector<int>>& vectors) {
+    using namespace std;
+    multiset<int> msV0(V0.begin(), V0.end());
+    int count = 0;
+    int N = vectors.size();
+    for (int i = 0; i < N; ++i) {
+        multiset<int> msVi(vectors[i].begin(), vectors[i].end());        
+        if (includes(msVi.begin(), msVi.end(), msV0.begin(), msV0.end())) {
+            count++;
         }
     }
+    cout << "Количество векторов, содержащих все элементы V0 (с учетом повторений): " << count << endl;
 }
 
-void task21(list<int>& L1, list<int>& L2, int K) {
-    if (K <= 0 || K >= 10) return;    
-    if (L1.size() >= 10) {
-        auto it = L1.begin();
-        advance(it, L1.size() - K);
-        rotate(L1.begin(), it, L1.end());
-    }    
-    if (L2.size() >= 10) {
-        auto it = L2.begin();
-        advance(it, K);
-        rotate(L2.begin(), it, L2.end());
+void task15(std::vector<int>& V) {
+    using namespace std;
+    map<int, int> M;
+    for (auto it = V.begin(); it != V.end(); ++it) {
+        M[*it]++; 
+    }
+    cout << "Результат подсчета повторений:" << endl;
+    for (auto it = M.begin(); it != M.end(); ++it) {
+        cout << it->first << " " << it->second << endl;
     }
 }
 
-void task45(deque<string>& D) {
-    cout << "Исходный дек: ";
-    printContainer(D);    
-    sort(D.begin(), D.end());
-    cout << "После сортировки по алфавиту: ";
-    printContainer(D);
-    SortbyLength sl; 
-    stable_sort(D.begin(), D.end(), sl);
-    cout << "После сортировки по длине: ";
-    printContainer(D);
-}
-
-void task61(list<string>& L) {
-    if (L.size() < 2) {
-        cout << "Список должен содержать не менее 2 элементов!" << endl;
-        return;
+void task22(std::vector<std::string>& V) {
+    using namespace std;
+    multimap<char, string> M;
+    for (auto it = V.rbegin(); it != V.rend(); ++it) {
+        if (!it->empty()) {
+            char lastChar = (*it)[it->length() - 1];
+            M.insert(make_pair(lastChar, *it));
+        }
     }
-    deque<string> D;
-    MakePairString pair;  
-    adjacent_difference(L.begin(), L.end(), back_inserter(D), pair);
-    if (!D.empty()) {
-        D.pop_front();
+    cout << "Результат группировки по последней букве:" << endl;
+    for (auto it = M.begin(); it != M.end(); ++it) {
+        cout << it->first << " " << it->second << endl;
     }
-    cout << "Полученный дек: ";
-    printContainer(D);
 }
