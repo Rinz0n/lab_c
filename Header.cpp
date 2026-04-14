@@ -1,118 +1,448 @@
 #include "Header.h"
 
-//  Добавляет числа в файл
-void addinfile(int &cnt){
- using namespace std;
- setlocale(LC_ALL, "RU");
- fstream mainfile;
- float num;
- mainfile.open("file.dat", ios::out | ios::binary);
- cout << "Сколько чисел хотите ввести:" << endl;
- cin >> cnt;
- cout << "Введите число:" << endl;
- for (int i = 0; i < cnt; i++) {
-  cin >> num;
-  mainfile.write((char*)&num, sizeof(num));
- }
- mainfile.close();
+Node::Node() : data(0), next(nullptr) {
 }
 
-void print(){
+Node::Node(int value) : data(value), next(nullptr) {
+}
+
+Node::Node(const Node& other) : data(other.data), next(nullptr) {
+}
+
+Node::~Node() {
+}
+
+Stack::Stack() : Head(nullptr) {
     using namespace std;
-    fstream file1, file2, mainfile;
-    file1.open("file1.dat", ios::in | ios::binary);
-    file2.open("file2.dat", ios::in | ios::binary);
-    mainfile.open("file.dat", ios::in | ios::binary);
-    float num;
-    cout << "Содержимое файла file1.dat:" << endl;
-    while (file1.read((char*)&num, sizeof(num))){
-        cout << num << endl;
-    }
-    cout << "Содержимое файла file2.dat:" << endl;
-    while (file2.read((char*)&num, sizeof(num))){
-        cout << num << endl;
-    }
-    cout << "Содержимое файла file.dat:" << endl;
-    while (mainfile.read((char*)&num, sizeof(num))){
-        cout << num << endl;
-    }
-    mainfile.close();
-    file1.close();
-    file2.close();
+    cout << "Создан пустой стек" << endl;
 }
 
-// Разделяет числа в файлы
-void distrinfile(int &cnt){
- using namespace std;
- fstream mainfile, file1, file2;
- mainfile.open("file.dat", ios::in | ios::binary);
- file1.open("file1.dat", ios::out | ios::in | ios::binary);
- file2.open("file2.dat", ios::out | ios::in | ios::binary);
- float num;
- int c = 1;
- while (c <= cnt) {
-  mainfile.read((char*)&num, sizeof(num));
-  if (c % 2 != 0) {
-   file1.write((char*)&num, sizeof(num));
-  }
-  else {
-   file2.write((char*)&num, sizeof(num));
-  }
-  c++;
- }
- cout << "Числа добавлены в файлы file1 и file2!" << endl;
- mainfile.close();
- file1.close();
- file2.close();
-}
-
-// Удаляет из файла все отрицательные числа
-void deletenegativenumbers(int &cnt){
- using namespace std;
- fstream mainfile;
- mainfile.open("file.dat", ios::in | ios::binary);
- vector<float> vec;
- float num;
- while (mainfile.read((char*)&num, sizeof(num))) {
-  if (num >= 0) {
-   vec.push_back(num);
-  }
- }
- mainfile.close();
- mainfile.open("file.dat", ios::out | ios::binary | ios::trunc);
- for (int i = 0; i < vec.size(); i++) {
-  mainfile.write((char*)&vec[i], sizeof(vec[i]));
- }
- cout << "Из файла были удалены все отрицательные числа!" << endl;
- mainfile.close();
- mainfile.open("file.dat", ios::in | ios::binary);
- cout << "Содержимое файла file.dat:" << endl;
- while (mainfile.read((char*)&num, sizeof(num))) {
-    cout << num << endl;
- }
- mainfile.close();
-}
-
-// Функция для 4 задания
-int expr(std::string s, int &i) {
- using namespace std;
- if (isdigit(s[i])) return s[i++] - '0';
- char op = s[i++];
- i++; 
- int a = expr(s,i);
- i++; 
- int b = expr(s,i);
- i++; 
- return op == 'M' ? max(a, b) : min(a, b);
-}
-
-void createfile(int n){
+Stack::Stack(const Stack& other) : Head(nullptr) {
     using namespace std;
-    string name;
-    for (int i = 1; i<= n; i++){
-        name = 'S' + to_string(i);
-        fstream name;
-        name.open('S' + to_string(i), ios::out | ios::binary);
+    cout << "Копирование стека" << endl;
+    if (other.Head == nullptr) return;
+    int* temp = new int[100];
+    int count = 0;
+    Node* current = other.Head;
+    while (current != nullptr) {
+        temp[count++] = current->data;
+        current = current->next;
+    }
+    for (int i = count - 1; i >= 0; i--) {
+        push(temp[i]);
+    }
+    delete[] temp;
+}
 
+Stack::~Stack() {
+    using namespace std;
+    cout << "Удаление стека" << endl;
+    while (!isEmpty()) {
+        pop();
+    }
+}
+
+void Stack::push(int value) {
+    using namespace std;
+    Node* newNode = new Node(value);
+    newNode->next = Head;
+    Head = newNode;
+}
+
+int Stack::pop() {
+    using namespace std;
+    if (isEmpty()) {
+        cout << "Стек пуст!" << endl;
+        return -1;
+    }
+    Node* temp = Head;
+    int value = temp->data;
+    Head = Head->next;
+    delete temp;
+    cout << "Извлечено из стека: " << value << endl;
+    return value;
+}
+
+bool Stack::isEmpty() const {
+    return Head == nullptr;
+}
+
+void Stack::show() const {
+    using namespace std;
+    if (isEmpty()) {
+        cout << "Стек пуст" << endl;
+        return;
+    }
+    cout << "Содержимое стека: ";
+    Node* current = Head;
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+void Stack::createFromInput() {
+    using namespace std;
+    int count, value;
+    cout << "Сколько чисел добавить в стек? ";
+    cin >> count;
+    cout << "Введите числа: ";
+    for (int i = 0; i < count; i++) {
+        cin >> value;
+        push(value);
+    }
+}
+
+void Stack::createFromFile(const std::string& filename) {
+    using namespace std;
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Ошибка открытия файла " << filename << endl;
+        return;
+    }
+    int value;
+    cout << "Чтение данных из файла " << filename << ":" << endl;
+    while (file >> value) {
+        push(value);
+    }
+    file.close();
+    cout << "Загрузка из файла завершена" << endl;
+}
+
+void Stack::createRandom(int count) {
+    using namespace std;
+    srand(time(nullptr));
+    cout << "Генерация " << count << " случайных чисел:" << endl;
+    for (int i = 0; i < count; i++) {
+        int value = rand() % 100;
+        push(value);
+    }
+}
+
+void Stack::merge(Stack& other) {
+    using namespace std;
+    while (!other.isEmpty()) {
+        int value = other.pop();
+        push(value);
+    }
+}
+
+Queue::Queue() : Head(nullptr), LastNode(nullptr) {
+    using namespace std;
+    cout << "Создана пустая очередь" << endl;
+}
+
+Queue::Queue(const Queue& other) : Head(nullptr), LastNode(nullptr) {
+    using namespace std;
+    cout << "Копирование очереди" << endl;
+    Node* current = other.Head;
+    while (current != nullptr) {
+        enqueue(current->data);
+        current = current->next;
+    }
+}
+
+Queue::~Queue() {
+    using namespace std;
+    cout << "Удаление очереди" << endl;
+    while (!isEmpty()) {
+        dequeue();
+    }
+}
+
+void Queue::enqueue(int value) {
+    using namespace std;
+    Node* newNode = new Node(value);
+    if (isEmpty()) {
+        Head = LastNode = newNode;
+    }
+    else {
+        LastNode->next = newNode;
+        LastNode = newNode;
+    }
+    cout << "Добавлено в очередь: " << value << endl;
+}
+
+int Queue::dequeue() {
+    using namespace std;
+    if (isEmpty()) {
+        cout << "Очередь пуста!" << endl;
+        return -1;
+    }
+    Node* temp = Head;
+    int value = temp->data;
+    Head = Head->next;
+    if (Head == nullptr) {
+        LastNode = nullptr;
+    }
+    delete temp;
+    cout << "Извлечено из очереди: " << value << endl;
+    return value;
+}
+bool Queue::isEmpty() const {
+    return Head == nullptr;
+}
+
+void Queue::show() const {
+    using namespace std;
+    if (isEmpty()) {
+        cout << "Очередь пуста" << endl;
+        return;
+    }
+    cout << "Содержимое очереди: ";
+    Node* current = Head;
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+void Queue::createFromInput() {
+    using namespace std;
+    int count, value;
+    cout << "Сколько чисел добавить в очередь? ";
+    cin >> count;
+    cout << "Введите числа: ";
+    for (int i = 0; i < count; i++) {
+        cin >> value;
+        enqueue(value);
+    }
+}
+
+void Queue::createFromFile(const std::string& filename) {
+    using namespace std;
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Ошибка открытия файла " << filename << endl;
+        return;
+    }
+    int value;
+    cout << "Чтение данных из файла " << filename << ":" << endl;
+    while (file >> value) {
+        enqueue(value);
+    }
+    file.close();
+    cout << "Загрузка из файла завершена" << endl;
+}
+
+void Queue::createRandom(int count) {
+    using namespace std;
+    srand(time(nullptr));
+    cout << "Генерация " << count << " случайных чисел:" << endl;
+    for (int i = 0; i < count; i++) {
+        int value = rand() % 100;
+        enqueue(value);
+    }
+}
+
+void Queue::extractElements(int N) {
+    using namespace std;
+    cout << "Извлечение " << N << " элементов из очереди:" << endl;
+    for (int i = 0; i < N && !isEmpty(); i++) {
+        int value = dequeue();
+        cout << "Извлечен: " << value << endl;
+    }
+    cout << "Новый адрес начала (Head): " << Head << endl;
+    cout << "Новый адрес конца (LastNode): " << LastNode << endl;
+}
+
+List::List() : Head(nullptr), LastNode(nullptr) {
+    using namespace std;
+    cout << "Создан пустой список" << endl;
+}
+
+List::List(const List& other) : Head(nullptr), LastNode(nullptr) {
+    using namespace std;
+    cout << "Копирование списка" << endl;
+    Node* current = other.Head;
+    while (current != nullptr) {
+        addToEnd(current->data);
+        current = current->next;
+    }
+}
+
+List::~List() {
+    using namespace std;
+    cout << "Удаление списка" << endl;
+    Node* current = Head;
+    while (current != nullptr) {
+        Node* temp = current;
+        current = current->next;
+        delete temp;
+    }
+}
+
+void List::addToEnd(int value) {
+    using namespace std;
+    Node* newNode = new Node(value);
+
+    if (Head == nullptr) {
+        Head = LastNode = newNode;
+    }
+    else {
+        LastNode->next = newNode;
+        LastNode = newNode;
+    }
+    cout << "Добавлено в список: " << value << endl;
+}
+
+void List::show() const {
+    using namespace std;
+    if (Head == nullptr) {
+        cout << "Список пуст" << endl;
+        return;
+    }
+    cout << "Содержимое списка: ";
+    Node* current = Head;
+    while (current != nullptr) {
+        cout << current->data << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+void List::createFromInput() {
+    using namespace std;
+    int count, value;
+    cout << "Сколько чисел добавить в список? ";
+    cin >> count;
+    cout << "Введите числа: ";
+    for (int i = 0; i < count; i++) {
+        cin >> value;
+        addToEnd(value);
+    }
+}
+
+void List::createFromFile(const std::string& filename) {
+    using namespace std;
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Ошибка открытия файла " << filename << endl;
+        return;
+    }
+    int value;
+    cout << "Чтение данных из файла " << filename << ":" << endl;
+    while (file >> value) {
+        addToEnd(value);
+    }
+    file.close();
+    cout << "Загрузка из файла завершена" << endl;
+}
+
+void List::createRandom(int count) {
+    using namespace std;
+    srand(time(nullptr));
+    cout << "Генерация " << count << " случайных чисел:" << endl;
+    for (int i = 0; i < count; i++) {
+        int value = rand() % 100;
+        addToEnd(value);
+    }
+}
+
+Node* List::getPtrToElement(int position) const {
+    Node* current = Head;
+    int count = 1;
+    while (current != nullptr && count < position) {
+        current = current->next;
+        count++;
+    }
+    return current;
+}
+
+void List::insertAfterEveryThird(int value) {
+    using namespace std;
+    cout << "Вставка значения " << value << " после каждого 3-го элемента" << endl;
+    Node* current = Head;
+    int count = 1;
+    while (current != nullptr) {
+        if (count % 3 == 0) {
+            Node* newNode = new Node(value);
+            newNode->next = current->next;
+            current->next = newNode;
+
+            if (current == LastNode) {
+                LastNode = newNode;
+            }
+
+            current = newNode->next;
+            count++;
+        }
+        else {
+            current = current->next;
+            count++;
+        }
+    }
+}
+
+List* List::copy() const {
+    List* newList = new List();
+    Node* current = Head;
+    while (current != nullptr) {
+        newList->addToEnd(current->data);
+        current = current->next;
+    }
+    return newList;
+}
+
+List* List::copySorted(int M) const {
+    using namespace std;
+    cout << "Создание копии списка с вставкой значения " << M << " (с сохранением упорядоченности)" << endl;
+    List* newList = new List();
+    Node* current = Head;
+    bool inserted = false;
+    while (current != nullptr) {
+        if (!inserted && current->data >= M) {
+            newList->addToEnd(M);
+            inserted = true;
+        }
+        newList->addToEnd(current->data);
+        current = current->next;
+    }
+    if (!inserted) {
+        newList->addToEnd(M);
+    }
+    return newList;
+}
+
+int chooseInputMethod() {
+    using namespace std;
+    cout << "\nВыберите способ заполнения:" << endl;
+    cout << "1 - Ввод с консоли" << endl;
+    cout << "2 - Загрузка из файла" << endl;
+    cout << "3 - Случайная генерация" << endl;
+    cout << "Ваш выбор: ";
+    int method;
+    cin >> method;
+    return method;
+}
+
+template<typename T>
+void fillStructure(T& structure, const std::string& structureName) {
+    using namespace std;
+    int method = chooseInputMethod();
+    switch (method) {
+    case 1: {
+        structure.createFromInput();
+        break;
+    }
+    case 2: {
+        string filename;
+        cout << "Введите имя файла: ";
+        cin >> filename;
+        structure.createFromFile(filename);
+        break;
+    }
+    case 3: {
+        int count;
+        cout << "Сколько случайных чисел сгенерировать? ";
+        cin >> count;
+        structure.createRandom(count);
+        break;
+    }
+    default:
+        cout << "Неверный выбор. Используем ввод с консоли." << endl;
+        structure.createFromInput();
     }
 }
