@@ -77,6 +77,71 @@ void fillRandom(Container& cont, const string& name) {
 }
 
 template<typename Container>
+void fillFromKeyboardString(Container& cont, const string& name) {
+    cont.clear();
+    int n;
+    cout << "Введите количество элементов в " << name << ": ";
+    while (!(cin >> n) || n <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Ошибка! Введите положительное целое число: ";
+    }
+    cout << "Введите " << n << " слов: ";
+    for (int i = 0; i < n; ++i) {
+        string value;
+        while (!(cin >> value)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Ошибка! Введите слово: ";
+        }
+        cont.insert(cont.end(), value);
+    }
+}
+
+template<typename Container>
+void fillFromFileString(Container& cont, const string& name) {
+    cont.clear();
+    string filename;
+    cout << "Введите имя файла для " << name << ": ";
+    cin >> filename;
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Ошибка открытия файла! Используем ручной ввод." << endl;
+        fillFromKeyboardString(cont, name);
+        return;
+    }
+    string value;
+    while (file >> value) {
+        cont.insert(cont.end(), value);
+    }
+    file.close();
+    if (cont.empty()) {
+        cout << "Файл пуст или содержит некорректные данные. Используем ручной ввод." << endl;
+        fillFromKeyboardString(cont, name);
+    } else {
+        cout << "Загрузка из файла завершена." << endl;
+    }
+}
+
+template<typename Container>
+void fillRandomString(Container& cont, const string& name) {
+    cont.clear();
+    srand(static_cast<unsigned int>(time(nullptr)));
+    int n;
+    cout << "Введите количество случайных элементов в " << name << ": ";
+    while (!(cin >> n) || n <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Ошибка! Введите положительное целое число: ";
+    }
+    vector<string> words = {"APPLE", "DOG", "CAT", "BANANA", "BIRD", "ZEBRA", "ANT", "ELEPHANT", "FISH", "CAR"};
+    for (int i = 0; i < n; ++i) {
+        cont.insert(cont.end(), words[rand() % words.size()]);
+    }
+    cout << "Сгенерировано " << n << " случайных слов." << endl;
+}
+
+template<typename Container>
 void fillContainer(Container& cont, const string& containerName) {
     cout << "\nВыберите способ заполнения " << containerName << ":" << endl;
     cout << "1 - С клавиатуры" << endl;
@@ -103,62 +168,80 @@ void fillContainer(Container& cont, const string& containerName) {
     }
 }
 
-void task7(vector<int>& V, deque<int>& D, list<int>& L) {
-    if (V.size() >= 2 && V.size() % 2 == 0) {
-        int mid1 = V.size() / 2 - 1;
-        int mid2 = V.size() / 2;
-        swap(V[mid1], V[mid2]);  
+template<typename Container>
+void fillContainerString(Container& cont, const string& containerName) {
+    cout << "\nВыберите способ заполнения " << containerName << ":" << endl;
+    cout << "1 - С клавиатуры" << endl;
+    cout << "2 - Из файла" << endl;
+    cout << "3 - Случайными словами" << endl;
+    cout << "Ваш выбор: ";
+    int choice;
+    while (!(cin >> choice) || choice < 1 || choice > 3) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Ошибка! Введите 1, 2 или 3: ";
     }
-    if (D.size() >= 2 && D.size() % 2 == 0) {
-        auto it1 = D.begin();
-        advance(it1, D.size() / 2 - 1);
-        auto it2 = it1;
-        ++it2;
-        swap(*it1, *it2);  
-    }
-    if (L.size() >= 2 && L.size() % 2 == 0) {
-        auto it1 = L.begin();
-        advance(it1, L.size() / 2 - 1);
-        auto it2 = it1;
-        ++it2;
-        swap(*it1, *it2);
-    }
-}
-
-void task13(vector<int>& V, deque<int>& D) {
-    if (V.size() % 2 == 0 && D.size() % 2 == 0 && !V.empty() && !D.empty()) {
-        size_t halfV = V.size() / 2;
-        size_t halfD = D.size() / 2;
-        vector<int>::iterator vMid = V.begin();
-        advance(vMid, halfV);
-        deque<int>::iterator dMid = D.begin();
-        advance(dMid, halfD);
-        D.insert(D.begin(), V.rbegin(), V.rbegin() + halfV);
-        V.insert(V.end(), D.begin() + halfV, dMid);
+    
+    switch (choice) {
+    case 1:
+        fillFromKeyboardString(cont, containerName);
+        break;
+    case 2:
+        fillFromFileString(cont, containerName);
+        break;
+    case 3:
+        fillRandomString(cont, containerName);
+        break;
     }
 }
 
-void task21(vector<int>& V) {
-    if (V.size() >= 5 && V.size() % 2 != 0) {
-        int N = V.size();
-        int start = (N / 2) - 1;  
-        V.erase(V.begin() + start, V.begin() + start + 3);
+void task1(vector<int>& V) {
+    auto it = find(V.begin(), V.end(), 0);
+    if (it != V.end()) {
+        auto it2 = find(++it, V.end(), 0);
+        if (it2 != V.end()) {
+            V.erase(it2);
+        }
     }
 }
 
-void task17(const string& name, const string& symbols) {
-    ofstream file(name);
-    if (!file.is_open()) {
-        cout << "Ошибка открытия файла!" << endl;
+void task21(list<int>& L1, list<int>& L2, int K) {
+    if (K <= 0 || K >= 10) return;    
+    if (L1.size() >= 10) {
+        auto it = L1.begin();
+        advance(it, L1.size() - K);
+        rotate(L1.begin(), it, L1.end());
+    }    
+    if (L2.size() >= 10) {
+        auto it = L2.begin();
+        advance(it, K);
+        rotate(L2.begin(), it, L2.end());
+    }
+}
+
+void task45(deque<string>& D) {
+    cout << "Исходный дек: ";
+    printContainer(D);    
+    sort(D.begin(), D.end());
+    cout << "После сортировки по алфавиту: ";
+    printContainer(D);
+    SortbyLength sl; 
+    stable_sort(D.begin(), D.end(), sl);
+    cout << "После сортировки по длине: ";
+    printContainer(D);
+}
+
+void task61(list<string>& L) {
+    if (L.size() < 2) {
+        cout << "Список должен содержать не менее 2 элементов!" << endl;
         return;
     }
-    ostream_iterator<int> fileIterator(file, " ");
-    stringstream ss(symbols);
-    istream_iterator<char> inputBegin(ss);
-    istream_iterator<char> inputEnd;
-    transform(inputBegin, inputEnd, fileIterator,
-              [](char c) { return static_cast<int>(c) * 2; });
-    
-    file.close();
+    deque<string> D;
+    MakePairString pair;  
+    adjacent_difference(L.begin(), L.end(), back_inserter(D), pair);
+    if (!D.empty()) {
+        D.pop_front();
+    }
+    cout << "Полученный дек: ";
+    printContainer(D);
 }
-
