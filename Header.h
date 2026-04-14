@@ -10,70 +10,111 @@ class Node {
 private:
     int data;
     Node* next;
+    Node* prev;  
 
 public:
     Node();
     Node(int value);
+    Node(int value, Node* n, Node* p);
     Node(const Node& other);
     ~Node();
-    friend class Stack;
-    friend class Queue;
-    friend class List;
+    friend class RingList;
+    friend class DoubleList1;
+    friend class DoubleList2;
+    friend class ListWithBarrier;
+    friend class DoubleList3;
     friend int main();
 };
 
-class Stack {
+class RingList {
 private:
-    Node* Head;
+    Node* first;
 
 public:
-    Stack();
-    Stack(const Stack& other);
-    ~Stack();
-    void push(int value);
-    int pop();
+    RingList();
+    RingList(const RingList& other);
+    ~RingList();
+    void add(int value);
     bool isEmpty() const;
     void show() const;
-    void merge(Stack& other);
+    void task1(const std::string& filename);
     void createFromInput();
     void createFromFile(const std::string& filename);
     void createRandom(int count);
 };
 
-class Queue {
+class DoubleList1 {
 private:
-    Node* Head;
-    Node* LastNode;
+    Node* first;
 
 public:
-    Queue();
-    Queue(const Queue& other);
-    ~Queue();
-    void enqueue(int value);
-    int dequeue();
+    DoubleList1();
+    DoubleList1(const DoubleList1& other);
+    ~DoubleList1();
+    void add(int value);
     bool isEmpty() const;
     void show() const;
-    void extractElements(int N);
+    void task2();
     void createFromInput();
     void createFromFile(const std::string& filename);
     void createRandom(int count);
 };
 
-class List {
+class DoubleList2 {
 private:
-    Node* Head;
-    Node* LastNode;
+    Node* first;
 
 public:
-    List();
-    List(const List& other);
-    ~List();
-    void addToEnd(int value);
-    void insertAfterEveryThird(int value);
+    DoubleList2();
+    DoubleList2(const DoubleList2& other);
+    ~DoubleList2();
+    void add(int value);
+    bool isEmpty() const;
     void show() const;
-    Node* getPtrToElement(int position) const;
-    List* copy() const;
-    List* copySorted(int M) const;  
+    void task3(const std::string& filename);
+    void createFromInput();
+    void createFromFile(const std::string& filename);
+    void createRandom(int count);
+};
+
+class TListB {
+    public:
+        Node* barrier;  
+        Node* current;  
+};
+
+class ListWithBarrier {
+private:
+    TListB list;
+
+public:
+    ListWithBarrier();
+    ListWithBarrier(const ListWithBarrier& other);
+    ~ListWithBarrier();
+    void add(int value);
+    void show() const;
+    void LBToFirst();
+    void LBToNext();
+    void LBSetData(int D);
+    bool IsBarrier();
+    void task4(int& count, Node*& newCurrent);
+    void createFromInput();
+    void createFromFile(const std::string& filename);
+    void createRandom(int count);
+};
+
+class DoubleList3 {
+private:
+    Node* first;
+
+public:
+    DoubleList3();
+    DoubleList3(const DoubleList3& other);
+    ~DoubleList3();
+    void add(int value);
+    bool isEmpty() const;
+    void show() const;
+    void task5();
     void createFromInput();
     void createFromFile(const std::string& filename);
     void createRandom(int count);
