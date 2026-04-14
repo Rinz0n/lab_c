@@ -1,125 +1,35 @@
 #pragma once
 #include <iostream>
+#include <vector>
+#include <deque>
+#include <list>
+#include <algorithm>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <string>
-#include <locale>
+#include <iterator>
+#include <limits>
+#include <sstream>  
 
-class Node {
-private:
-    int data;
-    Node* next;
-    Node* prev;  
+using namespace std;
 
-public:
-    Node();
-    Node(int value);
-    Node(int value, Node* n, Node* p);
-    Node(const Node& other);
-    ~Node();
-    friend class RingList;
-    friend class DoubleList1;
-    friend class DoubleList2;
-    friend class ListWithBarrier;
-    friend class DoubleList3;
-    friend int main();
-};
+template<typename Container>
+void printContainer(const Container& cont);
 
-class RingList {
-private:
-    Node* first;
+template<typename Container>
+void fillFromKeyboard(Container& cont, const string& name);
 
-public:
-    RingList();
-    RingList(const RingList& other);
-    ~RingList();
-    void add(int value);
-    bool isEmpty() const;
-    void show() const;
-    void task1(const std::string& filename);
-    void createFromInput();
-    void createFromFile(const std::string& filename);
-    void createRandom(int count);
-};
+template<typename Container>
+void fillFromFile(Container& cont, const string& name);
 
-class DoubleList1 {
-private:
-    Node* first;
+template<typename Container>
+void fillRandom(Container& cont, const string& name);
 
-public:
-    DoubleList1();
-    DoubleList1(const DoubleList1& other);
-    ~DoubleList1();
-    void add(int value);
-    bool isEmpty() const;
-    void show() const;
-    void task2();
-    void createFromInput();
-    void createFromFile(const std::string& filename);
-    void createRandom(int count);
-};
+template<typename Container>
+void fillContainer(Container& cont, const string& containerName);
 
-class DoubleList2 {
-private:
-    Node* first;
-
-public:
-    DoubleList2();
-    DoubleList2(const DoubleList2& other);
-    ~DoubleList2();
-    void add(int value);
-    bool isEmpty() const;
-    void show() const;
-    void task3(const std::string& filename);
-    void createFromInput();
-    void createFromFile(const std::string& filename);
-    void createRandom(int count);
-};
-
-class TListB {
-    public:
-        Node* barrier;  
-        Node* current;  
-};
-
-class ListWithBarrier {
-private:
-    TListB list;
-
-public:
-    ListWithBarrier();
-    ListWithBarrier(const ListWithBarrier& other);
-    ~ListWithBarrier();
-    void add(int value);
-    void show() const;
-    void LBToFirst();
-    void LBToNext();
-    void LBSetData(int D);
-    bool IsBarrier();
-    void task4(int& count, Node*& newCurrent);
-    void createFromInput();
-    void createFromFile(const std::string& filename);
-    void createRandom(int count);
-};
-
-class DoubleList3 {
-private:
-    Node* first;
-
-public:
-    DoubleList3();
-    DoubleList3(const DoubleList3& other);
-    ~DoubleList3();
-    void add(int value);
-    bool isEmpty() const;
-    void show() const;
-    void task5();
-    void createFromInput();
-    void createFromFile(const std::string& filename);
-    void createRandom(int count);
-};
-
-int chooseInputMethod();
-template<typename T>
-void fillStructure(T& structure, const std::string& structureName);
+void task7(vector<int>& V, deque<int>& D, list<int>& L);
+void task13(vector<int>& V, deque<int>& D);
+void task21(vector<int>& V);
+void task17(const string& name, const string& symbols);
