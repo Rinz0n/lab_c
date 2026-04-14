@@ -1,53 +1,117 @@
 #pragma once
 #include <iostream>
+#include <string>
 #include <vector>
-#include <deque>
-#include <list>
+#include <memory>
+#include <limits>
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <string>
-#include <iterator>
-#include <limits>
-#include <sstream>  
-#include <functional>
-#include <numeric>
 
-using namespace std;
+void clearInput();
+int getIntInput(const std::string& prompt, int minVal = -1, int maxVal = -1);
+void fillFromChoice(const std::string& prompt, const std::string& type);
 
-struct SortbyLength {
-    bool operator()(const string& a, const string& b) const {
-        return a.length() < b.length();
-    }
+class Time {
+private:
+    int seconds;
+public:
+    Time(int sec);
+    std::string toString() const;
+    void print() const;
+    static void demoInput();
 };
 
-struct MakePairString {
-    string operator()(const string& right, const string& left) const {
-        if (left.empty() || right.empty()) return "";
-        return string(1, left.front()) + string(1, right.back());
-    }
+class House {
+private:
+    int floors;
+public:
+    House(int floors);
+    std::string toString() const;
+    void print() const;
+    static void demoInput();
 };
 
-template<typename Container>
-void printContainer(const Container& cont);
+class Employee; 
 
-template<typename Container>
-void fillFromKeyboard(Container& cont, const string& name);
+class Department {
+private:
+    std::string name;
+    Employee* chief;
+    
+public:
+    Department(const std::string& name);
+    void setChief(Employee* emp);
+    std::string getName() const;
+    Employee* getChief() const;
+    void print() const;        
+};
 
-template<typename Container>
-void fillFromFile(Container& cont, const string& name);
+class Employee {
+private:
+    std::string name;
+    Department* department;
+public:
+    Employee(const std::string& name, Department* dept);
+    std::string toString() const;
+    void print() const;
+    std::string getName() const { return name; }  
+    static void demoInput();
+};
 
-template<typename Container>
-void fillRandom(Container& cont, const string& name);
+class EmployeeExtended;
+class DepartmentExtended;
 
-template<typename Container>
-void fillContainer(Container& cont, const string& containerName);
+class DepartmentExtended {
+private:
+    std::string name;
+    EmployeeExtended* chief;
+    std::vector<EmployeeExtended*> employees;
+public:
+    DepartmentExtended(const std::string& name);
+    void setChief(EmployeeExtended* emp);
+    void addEmployee(EmployeeExtended* emp);
+    std::string getName() const;
+    EmployeeExtended* getChief() const;
+    const std::vector<EmployeeExtended*>& getEmployees() const;
+    void print() const;
+};
 
-template<typename Container>
-void fillContainerString(Container& cont, const string& containerName);
+class EmployeeExtended {
+private:
+    std::string name;
+    DepartmentExtended* department;
+public:
+    EmployeeExtended(const std::string& name, DepartmentExtended* dept);
+    std::string toString() const;
+    void print() const;
+    std::string getName() const { return name; }  // ← ДОБАВИТЬ ЭТУ СТРОКУ
+    std::vector<EmployeeExtended*> getDepartmentEmployees() const;
+    static void demoInput();
+};
 
-void task1(vector<int>& V);
-void task21(list<int>& L1, list<int>& L2, int K);
-void task45(deque<string>& D);
-void task61(list<string>& L);
+class ImmutableHouse {
+private:
+    const int floors;
+public:
+    explicit ImmutableHouse(int floors);
+    std::string toString() const;
+    void print() const;
+    bool tryChangeFloors(int newFloors);
+    static void demoInput();
+};
+
+class Gun {
+private:
+    int bullets;
+public:
+    Gun();
+    explicit Gun(int bullets);
+    void shoot();
+    void print() const;
+    int getBullets() const;
+    static void demoInput();
+};
