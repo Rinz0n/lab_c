@@ -1,592 +1,281 @@
 #include "Header.h"
 
-void clearInput() {
-    using namespace std;
-    cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+Node::Node() : data(0), left(nullptr), right(nullptr) {}
+Node::Node(int value) : data(value), left(nullptr), right(nullptr) {}
+Node::Node(int value, Node* l, Node* r) : data(value), left(l), right(r) {}
+Node::Node(const Node& other) : data(other.data), left(nullptr), right(nullptr) {}
+Node::~Node() {}
+
+Tree::Tree() : root(nullptr) {
+    std::cout << "Создано пустое дерево поиска" << std::endl;
 }
 
-int getIntInput(const std::string& prompt, int minVal, int maxVal) {
-    using namespace std;
+Tree::Tree(const Tree& other) : root(nullptr) {
+    std::cout << "Копирование дерева" << std::endl;
+}
+
+Tree::~Tree() {
+    std::cout << "Удаление дерева" << std::endl;
+    destroyTree(root);
+}
+
+void Tree::destroyTree(Node* node) {
+    if (node) {
+        destroyTree(node->left);
+        destroyTree(node->right);
+        delete node;
+    }
+}
+
+void Tree::addNode(Node*& node, int value) {
+    if (!node) {
+        node = new Node(value);
+        return;
+    }
+    if (value < node->data) {
+        addNode(node->left, value);
+    }
+    else if (value > node->data) {
+        addNode(node->right, value);
+    }
+}
+
+void Tree::add(int value) {
+    addNode(root, value);
+    std::cout << "Добавлено в дерево: " << value << std::endl;
+}
+
+bool Tree::isEmpty() const {
+    return root == nullptr;
+}
+
+void Tree::printTreeGraphic(Node* node, int space, int indent) {
+    if (!node) return;
+    space += indent;
+    printTreeGraphic(node->right, space, indent);
+    std::cout << std::endl;
+    for (int i = indent; i < space; i++) {
+        std::cout << " ";
+    }
+    std::cout << node->data << std::endl;
+    printTreeGraphic(node->left, space, indent);
+}
+
+void Tree::show() {
+    if (isEmpty()) {
+        std::cout << "Дерево пусто" << std::endl;
+        return;
+    }
+    std::cout << "\n=== СТРУКТУРА ДЕРЕВА (графическое представление) ===" << std::endl;
+    printTreeGraphic(root, 0, 5);
+    std::cout << "=====================================================" << std::endl;
+}
+
+void Tree::showGraphic() {
+    show();
+}
+
+int Tree::getHeight(Node* node) {
+    if (!node) return 0;
+    int leftHeight = getHeight(node->left);
+    int rightHeight = getHeight(node->right);
+    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+}
+
+Node* Tree::findMax(Node* node) {
+    if (!node) return nullptr;
+    while (node->right) {
+        node = node->right;
+    }
+    return node;
+}
+
+int Tree::task6() {
+    if (isEmpty()) {
+        std::cout << "Ошибка: дерево пусто!" << std::endl;
+        return -1;
+    }
+    Node* maxNode = findMax(root);
+    int maxValue = maxNode->data;
+    std::cout << "Максимальное значение в дереве: " << maxValue << std::endl;
+    return maxValue;
+}
+
+Node* Tree::search(Node* node, int key, int& count) {
+    count++;
+    if (!node) return nullptr;
+    if (key == node->data) {
+        return node;
+    }
+    else if (key < node->data) {
+        return search(node->left, key, count);
+    }
+    else {
+        return search(node->right, key, count);
+    }
+}
+
+Node* Tree::task15(int K, int& N) {
+    N = 0;
+    if (isEmpty()) {
+        std::cout << "Дерево пусто!" << std::endl;
+        return nullptr;
+    }
+    Node* result = search(root, K, N);
+    if (result) {
+        std::cout << "Вершина со значением " << K << " найдена!" << std::endl;
+        std::cout << "Указатель на вершину: " << result << std::endl;
+    }
+    else {
+        std::cout << "Вершина со значением " << K << " не найдена!" << std::endl;
+    }
+    std::cout << "Количество проанализированных вершин: " << N << std::endl;
+    return result;
+}
+
+void Tree::printLevel(Node* node, int level, int targetLevel, std::vector<int>& result) {
+    if (!node) return;
+    if (level == targetLevel) {
+        result.push_back(node->data);
+        return;
+    }
+    printLevel(node->left, level + 1, targetLevel, result);
+    printLevel(node->right, level + 1, targetLevel, result);
+}
+
+void Tree::task22(int K, std::vector<int>& result) {
+    result.clear();
+    if (isEmpty()) {
+        std::cout << "Дерево пусто!" << std::endl;
+        return;
+    }
+    if (K < 0) {
+        std::cout << "Ошибка: уровень не может быть отрицательным!" << std::endl;
+        return;
+    }
+    printLevel(root, 0, K, result);
+    std::cout << "Вершины на " << K << "-м уровне (слева направо): ";
+    if (result.empty()) {
+        std::cout << "нет вершин";
+    }
+    else {
+        for (int val : result) {
+            std::cout << val << " ";
+        }
+    }
+    std::cout << std::endl;
+}
+
+void Tree::createFromInput() {
+    int count, value;
+    std::cout << "Сколько чисел добавить в дерево? ";
+    std::cin >> count;
+    std::cout << "Введите числа (без повторений): ";
+    for (int i = 0; i < count; i++) {
+        std::cin >> value;
+        add(value);
+    }
+}
+
+void Tree::createFromFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cout << "Ошибка открытия файла " << filename << std::endl;
+        return;
+    }
     int value;
-    cout << prompt;
-    while (!(cin >> value)) {
-        clearInput();
-        cout << "Ошибка! Введите целое число: ";
+    while (file >> value) {
+        add(value);
     }
-    
-    if (minVal != -1 && value < minVal) {
-        cout << "Ошибка! Значение должно быть >= " << minVal << ". Повторите ввод: ";
-        return getIntInput(prompt, minVal, maxVal);
-    }
-    if (maxVal != -1 && value > maxVal) {
-        cout << "Ошибка! Значение должно быть <= " << maxVal << ". Повторите ввод: ";
-        return getIntInput(prompt, minVal, maxVal);
-    }
-    
-    return value;
+    file.close();
+    std::cout << "Загрузка из файла завершена" << std::endl;
 }
 
-Time::Time(int sec) {
-    seconds = sec % 86400;
-    if (seconds < 0) seconds += 86400;
-}
-
-std::string Time::toString() const {
-    using namespace std;
-    int hours = seconds / 3600;
-    int minutes = (seconds % 3600) / 60;
-    int secs = seconds % 60;
-    stringstream ss;
-    ss << hours << ":" 
-       << (minutes < 10 ? "0" : "") << minutes << ":"
-       << (secs < 10 ? "0" : "") << secs;
-    return ss.str();
-}
-
-void Time::print() const {
-    using namespace std;
-    cout << toString() << endl;
-}
-
-void Time::demoInput() {
-    using namespace std;
-    cout << "\nЗаполнение данных для задачи 1" << endl;
-    cout << "Выберите способ заполнения:\n";
-    cout << "1 - Ввод с клавиатуры\n";
-    cout << "2 - Загрузка из файла\n";
-    cout << "3 - Случайные значения\n";
-    cout << "Ваш выбор: ";
-    
-    int choice = getIntInput("", 1, 3);
-    
-    vector<int> times;
-    
-    switch(choice) {
-        case 1: {
-            cout << "Введите количество значений времени: ";
-            int count = getIntInput("", 1, 100);
-            cout << "Введите " << count << " чисел (количество секунд): ";
-            for (int i = 0; i < count; i++) {
-                int t = getIntInput("");
-                times.push_back(t);
-            }
-            break;
-        }
-        case 2: {
-            string filename;
-            cout << "Введите имя файла: ";
-            cin >> filename;
-            ifstream file(filename);
-            if (!file.is_open()) {
-                cout << "Ошибка открытия файла!" << endl;
-                return;
-            }
-            int t;
-            while (file >> t) {
-                times.push_back(t);
-            }
-            file.close();
-            if (times.empty()) {
-                cout << "Файл пуст или содержит некорректные данные!" << endl;
-                return;
-            }
-            cout << "Загружено " << times.size() << " значений из файла." << endl;
-            break;
-        }
-        case 3: {
-            srand(time(nullptr));
-            int count = getIntInput("Введите количество случайных значений: ", 1, 100);
-            for (int i = 0; i < count; i++) {
-                times.push_back(rand() % 1000000);
-            }
-            cout << "Сгенерировано " << count << " случайных значений." << endl;
-            break;
-        }
-    }
-    
-    cout << "\nРезультаты:\n";
-    for (int t : times) {
-        Time time(t);
-        cout << t << " секунд -> ";
-        time.print();
-    }
-}
-
-House::House(int floors) : floors(floors) {}
-
-std::string House::toString() const {
-    using namespace std;
-    stringstream ss;
-    ss << "дом с " << floors << " ";
-    int lastDigit = floors % 10;
-    int lastTwoDigits = floors % 100;
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-        ss << "этажами";
-    } else if (lastDigit == 1) {
-        ss << "этажом";
-    } else {
-        ss << "этажами";
-    }
-    return ss.str();
-}
-
-void House::print() const {
-    using namespace std;
-    cout << toString() << endl;
-}
-
-void House::demoInput() {
-    using namespace std;
-    cout << "\nЗаполнение данных для задачи 2" << endl;
-    cout << "Выберите способ заполнения:\n";
-    cout << "1 - Ввод с клавиатуры\n";
-    cout << "2 - Загрузка из файла\n";
-    cout << "3 - Случайные значения\n";
-    cout << "Ваш выбор: ";
-    
-    int choice = getIntInput("", 1, 3);
-    
-    vector<int> floors;
-    
-    switch(choice) {
-        case 1: {
-            cout << "Введите количество домов: ";
-            int count = getIntInput("", 1, 100);
-            cout << "Введите количество этажей для " << count << " домов: ";
-            for (int i = 0; i < count; i++) {
-                int f = getIntInput("", 1, 1000);
-                floors.push_back(f);
-            }
-            break;
-        }
-        case 2: {
-            string filename;
-            cout << "Введите имя файла: ";
-            cin >> filename;
-            ifstream file(filename);
-            if (!file.is_open()) {
-                cout << "Ошибка открытия файла!" << endl;
-                return;
-            }
-            int f;
-            while (file >> f) {
-                floors.push_back(f);
-            }
-            file.close();
-            cout << "Загружено " << floors.size() << " значений из файла." << endl;
-            break;
-        }
-        case 3: {
-            srand(time(nullptr));
-            int count = getIntInput("Введите количество случайных домов: ", 1, 100);
-            for (int i = 0; i < count; i++) {
-                floors.push_back(rand() % 100 + 1);
-            }
-            cout << "Сгенерировано " << count << " случайных домов." << endl;
-            break;
-        }
-    }
-    
-    cout << "\nРезультаты:\n";
-    for (int f : floors) {
-        House house(f);
-        house.print();
-    }
-}
-
-Department::Department(const std::string& name) : name(name), chief(nullptr) {}
-
-void Department::setChief(Employee* emp) { chief = emp; }
-
-std::string Department::getName() const { return name; }
-
-Employee* Department::getChief() const { return chief; }
-
-void Department::print() const {
-    using namespace std;
-    cout << "Отдел: " << name << endl;
-    if (chief) {
-        cout << "Начальник: " << chief->getName() << endl;
-    } else {
-        cout << "Начальник: не назначен" << endl;
-    }
-}
-
-Employee::Employee(const std::string& name, Department* dept) : name(name), department(dept) {}
-
-std::string Employee::toString() const {
-    using namespace std;
-    if (department && department->getChief() == this) {
-        return name + " начальник отдела " + department->getName();
-    } else if (department && department->getChief()) {
-        return name + " работает в отделе " + department->getName() 
-               + ", начальник которого " + department->getChief()->getName();
-    }
-    return name;
-}
-
-void Employee::print() const {
-    using namespace std;
-    cout << toString() << endl;
-}
-
-void Employee::demoInput() {
-    using namespace std;
-    cout << "\n--- Заполнение данных для задачи 3 (Сотрудники) ---" << endl;
-    
-    string deptName;
-    cout << "Введите название отдела: ";
-    cin >> deptName;
-    
-    Department dept(deptName);
-    
-    cout << "Введите количество сотрудников: ";
-    int count = getIntInput("", 1, 100);
-    
-    vector<Employee*> employees;
-    vector<string> employeeNames;
-    
-    cout << "Введите имена сотрудников:\n";
+void Tree::createRandom(int count) {
+    srand(time(nullptr));
     for (int i = 0; i < count; i++) {
-        string name;
-        cout << "Сотрудник " << i+1 << ": ";
-        cin >> name;
-        employees.push_back(new Employee(name, &dept));
-        employeeNames.push_back(name);
-    }
-    
-    string chiefName;
-    bool chiefFound = false;
-    while (!chiefFound) {
-        cout << "Введите имя начальника отдела: ";
-        cin >> chiefName;
-        
-        for (const string& name : employeeNames) {
-            if (name == chiefName) {
-                chiefFound = true;
-                break;
-            }
-        }
-        
-        if (!chiefFound) {
-            cout << "Ошибка! Сотрудника с именем \"" << chiefName << "\" нет в списке сотрудников." << endl;
-            cout << "Список сотрудников: ";
-            for (size_t i = 0; i < employeeNames.size(); i++) {
-                cout << employeeNames[i];
-                if (i < employeeNames.size() - 1) cout << ", ";
-            }
-            cout << endl;
-        }
-    }
-    
-    for (auto emp : employees) {
-        if (emp->getName() == chiefName) {
-            dept.setChief(emp);
-            break;
-        }
-    }
-    
-    cout << "\nРезультаты:\n";
-    for (auto emp : employees) {
-        emp->print();
-    }
-    
-    for (auto emp : employees) {
-        delete emp;
+        int value = rand() % 200 - 100;
+        add(value);
     }
 }
 
-DepartmentExtended::DepartmentExtended(const std::string& name) : name(name), chief(nullptr) {}
+Validator::Validator() {}
 
-void DepartmentExtended::setChief(EmployeeExtended* emp) { chief = emp; }
-
-void DepartmentExtended::addEmployee(EmployeeExtended* emp) { employees.push_back(emp); }
-
-std::string DepartmentExtended::getName() const { return name; }
-
-EmployeeExtended* DepartmentExtended::getChief() const { return chief; }
-
-const std::vector<EmployeeExtended*>& DepartmentExtended::getEmployees() const { return employees; }
-
-void DepartmentExtended::print() const {
-    using namespace std;
-    cout << "Отдел: " << name << endl;
-    if (chief) {
-        cout << "Начальник: " << chief->getName() << endl;
-    } else {
-        cout << "Начальник: не назначен" << endl;
+bool Validator::isBST(Node* node, int min, int max) {
+    if (!node) return true;
+    if (node->data < min || node->data > max) {
+        return false;
     }
-    cout << "Сотрудников: " << employees.size() << endl;
+    return isBST(node->left, min, node->data - 1) &&
+        isBST(node->right, node->data + 1, max);
 }
 
-EmployeeExtended::EmployeeExtended(const std::string& name, DepartmentExtended* dept) 
-    : name(name), department(dept) {
-    if (dept) dept->addEmployee(this);
+int Validator::getNodeCount(Node* node) {
+    if (!node) return 0;
+    return 1 + getNodeCount(node->left) + getNodeCount(node->right);
 }
 
-std::string EmployeeExtended::toString() const {
-    using namespace std;
-    if (department && department->getChief() == this) {
-        return name + " начальник отдела " + department->getName();
-    } else if (department && department->getChief()) {
-        return name + " работает в отделе " + department->getName() 
-               + ", начальник которого " + department->getChief()->getName();
-    }
-    return name;
-}
-
-void EmployeeExtended::print() const {
-    using namespace std;
-    cout << toString() << endl;
-}
-
-std::vector<EmployeeExtended*> EmployeeExtended::getDepartmentEmployees() const {
-    if (department) return department->getEmployees();
-    return {};
-}
-
-void EmployeeExtended::demoInput() {
-    using namespace std;
-    cout << "\n--- Заполнение данных для задачи 4 (Сотрудники расширенные) ---" << endl;
-    
-    string deptName;
-    cout << "Введите название отдела: ";
-    cin >> deptName;
-    
-    DepartmentExtended dept(deptName);
-    
-    cout << "Введите количество сотрудников: ";
-    int count = getIntInput("", 1, 100);
-    
-    vector<EmployeeExtended*> employees;
-    vector<string> employeeNames;
-    
-    cout << "Введите имена сотрудников:\n";
-    for (int i = 0; i < count; i++) {
-        string name;
-        cout << "Сотрудник " << i+1 << ": ";
-        cin >> name;
-        employees.push_back(new EmployeeExtended(name, &dept));
-        employeeNames.push_back(name);
-    }
-    
-    string chiefName;
-    bool chiefFound = false;
-    while (!chiefFound) {
-        cout << "Введите имя начальника отдела: ";
-        cin >> chiefName;
-        
-        for (const string& name : employeeNames) {
-            if (name == chiefName) {
-                chiefFound = true;
-                break;
-            }
-        }
-        
-        if (!chiefFound) {
-            cout << "Ошибка! Сотрудника с именем \"" << chiefName << "\" нет в списке сотрудников." << endl;
-            cout << "Список сотрудников: ";
-            for (size_t i = 0; i < employeeNames.size(); i++) {
-                cout << employeeNames[i];
-                if (i < employeeNames.size() - 1) cout << ", ";
-            }
-            cout << endl;
-        }
-    }
-    
-    for (auto emp : employees) {
-        if (emp->getName() == chiefName) {
-            dept.setChief(emp);
-            break;
-        }
-    }
-    
-    cout << "\nРезультаты:\n";
-    for (auto emp : employees) {
-        emp->print();
-    }
-    
-    cout << "\nСписок всех сотрудников через ссылку на первого сотрудника:\n";
-    if (!employees.empty()) {
-        vector<EmployeeExtended*> allEmps = employees[0]->getDepartmentEmployees();
-        for (auto emp : allEmps) {
-            cout << "  - " << emp->toString() << endl;
-        }
-    }
-    
-    for (auto emp : employees) delete emp;
-}
-
-// ========== ImmutableHouse ==========
-ImmutableHouse::ImmutableHouse(int floors) : floors(floors) {}
-
-std::string ImmutableHouse::toString() const {
-    using namespace std;
-    stringstream ss;
-    ss << "дом с " << floors << " ";
-    int lastDigit = floors % 10;
-    int lastTwoDigits = floors % 100;
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) ss << "этажами";
-    else if (lastDigit == 1) ss << "этажом";
-    else ss << "этажами";
-    return ss.str();
-}
-
-void ImmutableHouse::print() const {
-    using namespace std;
-    cout << toString() << endl;
-}
-
-bool ImmutableHouse::tryChangeFloors(int newFloors) {
-    using namespace std;
-    cout << "Попытка изменить количество этажей с " << floors 
-         << " на " << newFloors << " - НЕВОЗМОЖНО!" << endl;
+bool Validator::hasDuplicates(Node* node) {
+    if (!node) return false;
     return false;
 }
 
-void ImmutableHouse::demoInput() {
-    using namespace std;
-    cout << "\nЗаполнение данных для задачи 5" << endl;
-    cout << "Выберите способ заполнения:\n";
-    cout << "1 - Ввод с клавиатуры\n";
-    cout << "2 - Загрузка из файла\n";
-    cout << "3 - Случайные значения\n";
-    cout << "Ваш выбор: ";
-    
-    int choice = getIntInput("", 1, 3);
-    
-    vector<int> floors;
-    
-    switch(choice) {
-        case 1: {
-            cout << "Введите количество домов: ";
-            int count = getIntInput("", 1, 100);
-            cout << "Введите количество этажей: ";
-            for (int i = 0; i < count; i++) {
-                floors.push_back(getIntInput("", 1, 1000));
-            }
-            break;
-        }
-        case 2: {
-            string filename;
-            cout << "Введите имя файла: ";
-            cin >> filename;
-            ifstream file(filename);
-            if (!file.is_open()) {
-                cout << "Ошибка открытия файла!" << endl;
-                return;
-            }
-            int f;
-            while (file >> f) floors.push_back(f);
-            file.close();
-            cout << "Загружено " << floors.size() << " значений." << endl;
-            break;
-        }
-        case 3: {
-            srand(time(nullptr));
-            int count = getIntInput("Введите количество случайных домов: ", 1, 100);
-            for (int i = 0; i < count; i++) {
-                floors.push_back(rand() % 100 + 1);
-            }
-            cout << "Сгенерировано " << count << " случайных домов." << endl;
-            break;
-        }
+bool Validator::validateTree(Tree& tree) {
+    if (tree.isEmpty()) {
+        return true;
     }
-    
-    cout << "\nРезультаты:\n";
-    for (int f : floors) {
-        ImmutableHouse house(f);
-        house.print();
-    }
-    
-    cout << "\nДемонстрация невозможности изменения:\n";
-    if (!floors.empty()) {
-        ImmutableHouse testHouse(floors[0]);
-        testHouse.tryChangeFloors(floors[0] + 10);
-    }
+    return isBST(tree.getRoot(), INT_MIN, INT_MAX);
 }
 
-// ========== Gun ==========
-Gun::Gun() : bullets(5) {}
-
-Gun::Gun(int bullets) : bullets(bullets) {}
-
-void Gun::shoot() {
-    using namespace std;
-    if (bullets > 0) {
-        cout << "Бах!" << endl;
-        bullets--;
-    } else {
-        cout << "Клац!" << endl;
+void Validator::printValidationResult(Tree& tree) {
+    std::cout << "\n=== ПРОВЕРКА КОРРЕКТНОСТИ ДЕРЕВА ===" << std::endl;
+    if (validateTree(tree)) {
+        std::cout << "✓ Дерево является корректным деревом поиска!" << std::endl;
+        std::cout << "✓ Свойство BST соблюдено (левые < корень < правые)" << std::endl;
     }
+    else {
+        std::cout << "✗ Дерево НЕ является корректным деревом поиска!" << std::endl;
+    }
+    if (!tree.isEmpty()) {
+        std::cout << "✓ Количество вершин: " << getNodeCount(tree.getRoot()) << std::endl;
+    }
+    std::cout << "=====================================" << std::endl;
 }
 
-void Gun::print() const {
-    using namespace std;
-    cout << "Пистолет: " << bullets << (bullets % 10 == 1 && bullets % 100 != 11 ? " патрон" : " патронов") << endl;
+int chooseInputMethod() {
+    std::cout << "\nВыберите способ заполнения:" << std::endl;
+    std::cout << "1 - Ввод с консоли" << std::endl;
+    std::cout << "2 - Загрузка из файла" << std::endl;
+    std::cout << "3 - Случайная генерация" << std::endl;
+    std::cout << "Ваш выбор: ";
+    int method;
+    std::cin >> method;
+    return method;
 }
 
-int Gun::getBullets() const { return bullets; }
-
-void Gun::demoInput() {
-    using namespace std;
-    cout << "\nЗаполнение данных для задачи 6" << endl;
-    cout << "Выберите способ заполнения:\n";
-    cout << "1 - Ввод с клавиатуры\n";
-    cout << "2 - Загрузка из файла\n";
-    cout << "3 - Случайные значения\n";
-    cout << "Ваш выбор: ";
-    
-    int choice = getIntInput("", 1, 3);
-    
-    vector<int> bulletsList;
-    
-    switch(choice) {
-        case 1: {
-            int count = getIntInput("Введите количество пистолетов: ", 1, 100);
-            for (int i = 0; i < count; i++) {
-                bulletsList.push_back(getIntInput("Введите количество патронов для пистолета " + to_string(i+1) + ": ", 0, 1000));
-            }
-            break;
-        }
-        case 2: {
-            string filename;
-            cout << "Введите имя файла: ";
-            cin >> filename;
-            ifstream file(filename);
-            if (!file.is_open()) {
-                cout << "Ошибка открытия файла!" << endl;
-                return;
-            }
-            int b;
-            while (file >> b) bulletsList.push_back(b);
-            file.close();
-            cout << "Загружено " << bulletsList.size() << " пистолетов." << endl;
-            break;
-        }
-        case 3: {
-            srand(time(nullptr));
-            int count = getIntInput("Введите количество случайных пистолетов: ", 1, 100);
-            for (int i = 0; i < count; i++) {
-                bulletsList.push_back(rand() % 21);
-            }
-            cout << "Сгенерировано " << count << " пистолетов." << endl;
-            break;
-        }
+template<typename T>
+void fillStructure(T& structure, const std::string& structureName) {
+    int method = chooseInputMethod();
+    switch (method) {
+    case 1:
+        structure.createFromInput();
+        break;
+    case 2: {
+        std::string filename;
+        std::cout << "Введите имя файла: ";
+        std::cin >> filename;
+        structure.createFromFile(filename);
+        break;
     }
-    
-    for (int b : bulletsList) {
-        Gun gun(b);
-        cout << "\nПистолет с " << b << " патронами:" << endl;
-        gun.print();
-        cout << "Производим выстрелы (минимум 5 или пока не закончатся):" << endl;
-        for (int i = 1; i <= max(5, b + 2); i++) {
-            cout << "Выстрел " << i << ": ";
-            gun.shoot();
-        }
-        cout << "Состояние после стрельбы: ";
-        gun.print();
-        cout << "---" << endl;
+    case 3: {
+        int count;
+        std::cout << "Сколько случайных чисел сгенерировать? ";
+        std::cin >> count;
+        structure.createRandom(count);
+        break;
+    }
+    default:
+        std::cout << "Неверный выбор. Используем ввод с консоли." << std::endl;
+        structure.createFromInput();
     }
 }
